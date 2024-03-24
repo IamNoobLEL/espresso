@@ -1,12 +1,16 @@
 import sys
+import os
 import sqlite3
 from PyQt5.QtWidgets import QApplication, QMainWindow, QHeaderView, QTableWidgetItem, QDialog, QMessageBox
 from PyQt5 import uic
 
-class AddEditCoffeeForm(QDialog):
+from UI.main_ui import Ui_MainWindow
+from UI.addEditCoffeeForm_ui import Ui_AddEditCoffeeForm
+
+class AddEditCoffeeForm(QDialog, Ui_AddEditCoffeeForm):
     def __init__(self, parent=None, coffee_id=None):
         super().__init__(parent)
-        uic.loadUi('addEditCoffeeForm.ui', self)
+        self.setupUi(self)
 
         self.conn = parent.conn
         self.coffee_id = coffee_id
@@ -52,7 +56,7 @@ class AddEditCoffeeForm(QDialog):
         finally:
             self.accept()
     
-class Coffee(QMainWindow):
+class Coffee(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -60,14 +64,17 @@ class Coffee(QMainWindow):
         self.loadData()
 
     def initUI(self):
-        uic.loadUi('main.ui', self)
+        self.setupUi(self)
         self.setWindowTitle("Coffee Database")
 
         self.addButton.clicked.connect(self.addNewCoffee)
         self.editButton.clicked.connect(self.editCoffee)
 
     def initDB(self):
-        self.conn = sqlite3.connect("coffee.sqlite")
+        base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+        database_path = os.path.join(base_path, 'data', 'coffee.sqlite')
+        
+        self.conn = sqlite3.connect(database_path)
         self.cur = self.conn.cursor()
 
     def loadData(self):
